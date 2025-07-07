@@ -14,6 +14,8 @@ class HanoiAgent:
     def __init__(self, name, model="llama3.2:latest"):
         self.name = name
         self.llm = ChatOllama(model=model)
+        self.illegal_moves = 0  # Track number of illegal moves
+        self.fallbacks_used = 0  # Track number of fallbacks used (not used in this agent)
 
     """
     Extract a move from the LLM's raw text response.
@@ -40,11 +42,12 @@ class HanoiAgent:
     Args:
         state: The current state of the puzzle. Must implement get_legal_moves().
         memory (list): A list of recent moves to avoid repetition.
+        output (bool): Whether to print debug information.
 
     Returns:
         tuple or None: A legal move (from_peg, to_peg), or None if the response is invalid or illegal.
     """
-    def propose_move(self, state, memory):
+    def propose_move(self, state, memory, output=False):
         legal_moves = state.get_legal_moves()
         prompt = f"""
                 You are solving the Tower of Hanoi puzzle.
@@ -63,13 +66,20 @@ class HanoiAgent:
                 """
         response = self.llm.invoke([HumanMessage(content=prompt)])
         raw = response.content.strip()
-        # print(f"Raw response from {self.name}: {raw}")
+
+        if output:
+            print(f"Raw response from {self.name}: {raw}")
+
         try:
             move = HanoiAgent.extract_move(raw)
             if move in legal_moves:
                 return move
             else:
-                print(f"⚠️ {self.name} proposed an illegal move: {move}")
+                self.illegal_moves += 1
+                if output:
+                    print(f"⚠️ {self.name} proposed an illegal move: {move}")
         except ValueError:
-            print(f"❌ {self.name} gave an invalid response.")
+            self.illegal_moves += 1
+            if output:
+                print(f"❌ {self.name} gave an invalid response.")
         return None

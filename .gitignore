@@ -6,3 +6,9 @@ env/
 
 # Ignore VS Code settings
 .vscode/
+
+# Ignore pycache files
+agents/__pycache__/
+memory/__pycache__/
+puzzles/__pycache__/
+__pycache__/

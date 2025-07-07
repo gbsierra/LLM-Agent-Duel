@@ -4,17 +4,20 @@ import re
 import random
 
 class NimAgent:
-
     """
-    Initialize the Nim with a name and a language model.
+    Initialize the Nim agent with a name and a language model.
 
     Attributes:
         name (str): The name of the agent.
         model (str): The name of the LLM model to use.
+        illegal_moves (int): Count of illegal moves proposed.
+        fallbacks_used (int): Count of times fallback was triggered.
     """
     def __init__(self, name, model="llama3.2:latest"):
         self.name = name
         self.llm = ChatOllama(model=model)
+        self.illegal_moves = 0
+        self.fallbacks_used = 0
 
     """
     Extract a move from the LLM's raw text response.
@@ -44,11 +47,12 @@ class NimAgent:
     Args:
         state (NimState): The current state of the Nim game.
         memory (list): A list of recent moves.
+        output (bool): Whether to print debug output.
 
     Returns:
         tuple or None: A legal move (heap_index, num_removed), or None if invalid.
     """
-    def propose_move(self, state, memory):
+    def propose_move(self, state, memory, output=False):
         legal_moves = state.get_legal_moves()
         if not legal_moves:
             return None
@@ -66,17 +70,22 @@ class NimAgent:
 
         response = self.llm.invoke([HumanMessage(content=prompt)])
         raw = response.content.strip()
-        #print(f"Raw response from {self.name}: {raw}")
 
         try:
             move = NimAgent.extract_move(raw)
             if move in legal_moves:
                 return move
             else:
-                print(f"⚠️ {self.name} proposed an illegal move: {move}")
+                if output:
+                    print(f"⚠️ {self.name} proposed an illegal move: {move}")
+                self.illegal_moves += 1
         except ValueError:
-            print(f"❌ {self.name} gave an invalid response.")
+            if output:
+                print(f"❌ {self.name} gave an invalid response.")
+            self.illegal_moves += 1
 
         # Fallback to a random legal move
-        print(f"🔁 {self.name} falling back to random legal move.")
+        if output:
+            print(f"🔁 {self.name} falling back to random legal move.")
+        self.fallbacks_used += 1
         return random.choice(legal_moves)
