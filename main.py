@@ -1,14 +1,20 @@
 from memory.shared_memory import SharedMemory
+import os # to clear console
+
+
+# prompt types
+prompt_types_hanoi = ["baseline", "recursive_genius", "math_genius", "recursive_strat"]
+prompt_types_nim = [ "baseline", "game_theorist", "math_genius", "XOR_strat" ]
 
 # Game selection: "hanoi" or "nim"
-def run_game(selected_game="nim", output=True):
+def run_game(selected_game="nim", output=True, prompt="baseline"):
     # Importing necessary modules based on selected game
     if selected_game == "hanoi":
         from agents.hanoi_agent import HanoiAgent
         from puzzles.hanoi import HanoiState
 
-        agent1 = HanoiAgent("Agent A")
-        agent2 = HanoiAgent("Agent B")
+        agent1 = HanoiAgent("Llama3.2 Agent", model="llama3.2:latest")
+        agent2 = HanoiAgent("Gemma3 Agent", model="gemma3:latest")
         state = HanoiState(num_disks=3)
 
         def is_done():
@@ -18,8 +24,8 @@ def run_game(selected_game="nim", output=True):
         from agents.nim_agent import NimAgent
         from puzzles.nim import NimState
 
-        agent1 = NimAgent("Agent A")
-        agent2 = NimAgent("Agent B")
+        agent1 = NimAgent("Llama3.2 Agent", model="llama3.2:latest")
+        agent2 = NimAgent("Gemma3 Agent", model="gemma3:latest")
         state = NimState([3, 4, 5])
 
         def is_done():
@@ -36,7 +42,7 @@ def run_game(selected_game="nim", output=True):
     # Main game loop
     while not is_done() and turn < 20:
         agent = agents[turn % 2]
-        move = agent.propose_move(state, memory.get_recent(), output=output)
+        move = agent.propose_move(state, memory.get_recent(), output=output, prompt=prompt)
 
         if output:
             print(f"{agent.name} proposes move: {move}")
@@ -76,4 +82,46 @@ def run_game(selected_game="nim", output=True):
     }
 
 if __name__ == "__main__":
-    run_game(selected_game="hanoi", output=True)
+    # select game
+    game_input = input("Select Towers of Hanoi or Nim Game (H/N):").strip().lower()
+
+    if game_input in ["H", "h"]:
+        game_input = "hanoi"
+
+        # print available prompt types
+        print("Available prompt types for Towers of Hanoi:")
+        for i, prompt in enumerate(prompt_types_hanoi, start=1):
+            print(f"{i}. {prompt}")
+    elif game_input in ["N", "n"]:
+        game_input = "nim"
+
+        # print available prompt types
+        print("Available prompt types for Nim:")
+        for i, prompt in enumerate(prompt_types_nim, start=1):
+            print(f"{i}. {prompt}")
+    else:
+        print("Invalid selection! Defaulting to Nim.")
+        game_input = "nim"
+
+        # print available prompt types
+        print("Available prompt types for Nim:")
+        for i, prompt in enumerate(prompt_types_nim, start=1):
+            print(f"{i}. {prompt}")
+
+    # select prompt type
+    prompt_type = int(input("Select a prompt type (enter the number): ")) - 1
+    if game_input == "hanoi":
+        prompt_type = prompt_types_hanoi[prompt_type]
+    elif game_input == "nim":
+        prompt_type = prompt_types_nim[prompt_type]
+
+    # ask to clear screen
+    clear_screen = input("Would you like the console cleared? (Y/N): ").strip().lower()
+    if clear_screen in ["Y", "y"]:
+        os.system('cls' if os.name == 'nt' else 'clear')
+    
+    # add title
+    print(f"\nRunning: {game_input}\n Prompt type: {prompt_type}\n")
+
+    # run game 
+    run_game(selected_game=game_input, output=True, prompt=prompt_type)

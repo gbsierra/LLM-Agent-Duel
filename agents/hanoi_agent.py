@@ -40,21 +40,25 @@ class HanoiAgent:
     Propose the next move in the Tower of Hanoi puzzle using the language model.
 
     Args:
-        state: The current state of the puzzle. Must implement get_legal_moves().
+        state: The current state of the Hanoi puzzle.
         memory (list): A list of recent moves to avoid repetition.
         output (bool): Whether to print debug information.
+        prompt (str): The type of prompt to use
 
     Returns:
         tuple or None: A legal move (from_peg, to_peg), or None if the response is invalid or illegal.
     """
-    def propose_move(self, state, memory, output=False):
+    def propose_move(self, state, memory, output=False, prompt="baseline"):
         legal_moves = state.get_legal_moves()
-        prompt = f"""
+
+        match prompt:
+            case "baseline":
+                prompt = f"""
                 You are solving the Tower of Hanoi puzzle.
 
                 Your goal is to move all disks from peg 0 to peg 2, following these rules:
-                - Only one disk can be moved at a time.
-                - A larger disk may never be placed on top of a smaller disk.
+                    - Only one disk can be moved at a time.
+                    - A larger disk may never be placed on top of a smaller disk.
 
                 Current state: {state}
                 Recent moves: {memory}
@@ -64,6 +68,56 @@ class HanoiAgent:
                 Avoid repeating previous states or undoing recent moves.
                 Only respond with a Python tuple like (from_peg, to_peg). Do not explain.
                 """
+
+            case "recursive_genius":
+                prompt = f"""
+                You are a recursive problem-solving expert, known for solving Tower of Hanoi puzzles with perfect efficiency.
+
+                Your goal is to move all disks from peg 0 to peg 2, following these rules:
+                - Only one disk can be moved at a time.
+                - A larger disk may never be placed on top of a smaller disk.
+
+                Current state: {state}
+                Recent moves: {memory}
+                Legal moves: {legal_moves}
+
+                Use your recursive reasoning to choose the best next move from the list of legal moves.
+                Only respond with a Python tuple like (from_peg, to_peg). Do not explain.
+                """
+
+            case "math_genius":
+                prompt = f"""
+                You are a mathematical genius, known for solving Tower of Hanoi puzzles with perfect efficiency.
+
+                Your goal is to move all disks from peg 0 to peg 2, following these rules:
+                - Only one disk can be moved at a time.
+                - A larger disk may never be placed on top of a smaller disk.
+
+                Current state: {state}
+                Recent moves: {memory}
+                Legal moves: {legal_moves}
+
+                Use your mathematical insight to choose the best next move from the list of legal moves.
+                Only respond with a Python tuple like (from_peg, to_peg). Do not explain.
+                """
+
+            case "recursive_strat":
+                prompt = f"""
+                You are solving the Tower of Hanoi puzzle with 3 disks.
+
+                Your objective is to move all disks from peg 0 to peg 2 using peg 1 as auxiliary.
+                Follow the classic recursive strategy:
+                - Move the top n-1 disks to the auxiliary peg.
+                - Move the largest disk to the target peg.
+                - Move the n-1 disks from the auxiliary peg to the target peg.
+
+                Current state: {state}
+                Recent moves: {memory}
+                Legal moves: {legal_moves}
+
+                Choose the next move that follows this recursive plan. Only respond with a Python tuple like (from_peg, to_peg).
+                """
+
         response = self.llm.invoke([HumanMessage(content=prompt)])
         raw = response.content.strip()
 
