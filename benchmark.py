@@ -5,7 +5,7 @@ from main import run_game
 from main import prompt_types_hanoi, prompt_types_nim
 
 # game config
-selected_game = "nim"
+game_input = ""
 NUM_GAMES = 10
 results = []
 
@@ -14,9 +14,9 @@ os.makedirs("benchmarks", exist_ok=True)
 
 # get input for game type
 game_input = input("Select Towers of Hanoi or Nim Game (H/N):").strip().lower()
-if game_input in ["H", "h"]:
+if game_input == "h":
     game_input = "hanoi"
-elif game_input in ["N", "n"]:
+elif game_input == "n":
     game_input = "nim"
 else:
     print("Invalid selection! Defaulting to Nim.")
@@ -42,19 +42,19 @@ elif game_input == "nim":
 # for all selected prompts,
 for prompt in selected_prompts:
     
-    print(f"\nRunning benchmark for {selected_game} with prompt type: {prompt}")
+    print(f"\nRunning benchmark for {game_input} with prompt type: {prompt}")
     results = []  # reset results for each prompt
 
     # run games, appending results
     for i in range(NUM_GAMES):
-        result = run_game(selected_game=selected_game, output=False, prompt=prompt)
+        result = run_game(selected_game=game_input, output=False, prompt=prompt)
         result["game_number"] = i + 1
         results.append(result)
         print(f"Game {i+1}: Winner = {result['winner']}, Turns = {result['turns']}")
 
     # create timestamped filename in benchmarks dir
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = os.path.join("benchmarks", f"{selected_game}_benchmark_{prompt}_{timestamp}.csv")
+    filename = os.path.join("benchmarks", f"{game_input}_benchmark_{prompt}_{timestamp}.csv")
 
     # Save results to CSV
     with open(filename, "w", newline="") as f:

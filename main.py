@@ -1,7 +1,6 @@
 from memory.shared_memory import SharedMemory
 import os # to clear console
 
-
 # prompt types
 prompt_types_hanoi = ["baseline", "recursive_genius", "math_genius", "recursive_strat"]
 prompt_types_nim = [ "baseline", "game_theorist", "math_genius", "XOR_strat" ]
