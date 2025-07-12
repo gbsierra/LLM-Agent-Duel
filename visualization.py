@@ -20,7 +20,7 @@ def load_csvs(directory):
     for file in Path(directory).glob("*.csv"):
         try:
             df = pandas.read_csv(file)
-            # Extract prompt name from filename (e.g., nim_baseline.csv -> baseline)
+            # Extract prompt name from filename (e.g., nim_benchmark_baseline.csv -> baseline)
             prompt_name = file.stem.replace("nim_benchmark_", "").replace("hanoi_benchmark_", "")
             df["prompt"] = prompt_name
             dataframes.append(df)
@@ -68,6 +68,7 @@ if not nim_data.empty:
     seaborn.boxplot(x="prompt", y="turns", data=nim_data)
     matplotlib.pyplot.title("Turns per Prompt in Nim Game")
 else:
+    print("No Nim data to plot")
     matplotlib.pyplot.title("No Nim Data Available")
 matplotlib.pyplot.xlabel("Prompt")
 matplotlib.pyplot.ylabel("Number of Turns")
@@ -78,6 +79,7 @@ if not hanoi_data.empty:
     seaborn.boxplot(x="prompt", y="turns", data=hanoi_data)
     matplotlib.pyplot.title("Turns per Prompt in Towers of Hanoi")
 else:
+    print("No Hanoi data to plot")
     matplotlib.pyplot.title("No Hanoi Data Available")
 matplotlib.pyplot.xlabel("Prompt")
 matplotlib.pyplot.ylabel("Number of Turns")
@@ -98,6 +100,7 @@ if not nim_data.empty:
     seaborn.boxplot(x="prompt", y="illegal_moves", hue="agent", data=nim_data_melted)
     matplotlib.pyplot.title("Illegal Moves per Prompt in Nim Game")
 else:
+    print("No Nim data to plot")
     matplotlib.pyplot.title("No Nim Data Available")
 matplotlib.pyplot.xlabel("Prompt")
 matplotlib.pyplot.ylabel("Illegal Moves")
@@ -113,6 +116,7 @@ if not hanoi_data.empty:
     seaborn.boxplot(x="prompt", y="illegal_moves", hue="agent", data=hanoi_data_melted)
     matplotlib.pyplot.title("Illegal Moves per Prompt in Towers of Hanoi")
 else:
+    print("No Hanoi data to plot")
     matplotlib.pyplot.title("No Hanoi Data Available")
 matplotlib.pyplot.xlabel("Prompt")
 matplotlib.pyplot.ylabel("Illegal Moves")
